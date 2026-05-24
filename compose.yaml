@@ -13,30 +13,19 @@ services:
   kafka1:
     image: apache/kafka:4.0.2
     container_name: kafka1
-
     ports:
-      - "9092:9092"
-
+      - "127.0.0.1:9092:9092"
     environment:
-
       KAFKA_NODE_ID: 1
-
       KAFKA_PROCESS_ROLES: broker,controller
-
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093
-
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-
     volumes:
       - kafka_data:/var/lib/kafka/data
 
@@ -58,19 +47,20 @@ services:
     volumes:
       - redis_data:/data
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:25.1.2.3
-    environment:
-      CLICKHOUSE_USER: events
-      CLICKHOUSE_PASSWORD: events
-      CLICKHOUSE_DB: events
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-
+  event-db:
+    image: timescale/timescaledb:2.26.0-pg16
+    container_name: event-db
     ports:
-      - "127.0.0.1:8123:8123"
+      - "127.0.0.1:5433:5433"
+    environment:
+      POSTGRES_USER: ${EVENT_DB_USER}
+      POSTGRES_PASSWORD: ${EVENT_DB_PASSWORD}
+      POSTGRES_DB: ${EVENT_DB}
+      POSTGRES_PORT: 5433
     volumes:
-      - clickhouse_data:/var/lib/clickhouse
-      - ./init/init_clickhouse.sh:/docker-entrypoint-initdb.d/init-clickhouse.sh
+      - event_data:/var/lib/postgresql/data
+    command: postgres -p 5433
+    restart: always
 
   cohab-back:
     image: ghcr.io/cooperativehabitat/cohab:main
@@ -106,6 +96,7 @@ services:
 volumes:
   kafka_data:
   postgres_data:
+  event_data:
   mongodb_data:
   redis_data:
   clickhouse_data:
