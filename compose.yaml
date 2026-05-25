@@ -63,7 +63,9 @@ services:
     restart: always
 
   cohab-back:
-    image: ghcr.io/cooperativehabitat/cohab:main
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - COHAB_DB=${COHAB_DB}
