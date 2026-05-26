@@ -22,7 +22,6 @@ public class MemberPrincipal implements UserDetails {
     @JsonIgnore
     private String password;
     private SuperRole superRole;
-    private Map<UUID, List<Access>> familyAccesses;
 
     @Override
     public List<SuperRole> getAuthorities() {

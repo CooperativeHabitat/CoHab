@@ -17,31 +17,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtToPrincipalMapper {
-    private final ObjectMapper objectMapper;
 
     public MemberPrincipal convert(DecodedJWT jwt) {
         return MemberPrincipal.builder()
                 .id(UUID.fromString(jwt.getSubject()))
                 .username(jwt.getClaim("username").asString())
-                .superRole(SuperRole.valueOf(jwt.getClaim("superRole").asString()))
-                .familyAccesses(extractAuthoritiesFromJwt(jwt)).build();
+                .superRole(SuperRole.valueOf(jwt.getClaim("superRole").asString())).build();
     }
 
-    private Map<UUID, List<Access>> extractAuthoritiesFromJwt(DecodedJWT jwt) {
-        try {
-            String familyAccessesJson = jwt.getClaim("familyAccesses").asString();
-
-            if (familyAccessesJson == null || familyAccessesJson.isEmpty()) {
-                return Map.of();
-            }
-
-            return objectMapper.readValue(familyAccessesJson,
-                    new TypeReference<>() {
-                    });
-
-        } catch (Exception ex) {
-            log.error("Error extracting authorities from JWT: {}", ex.getMessage());
-            return Map.of();
-        }
-    }
 }

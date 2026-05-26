@@ -22,18 +22,15 @@ public class JwtIssuer {
 
     @SneakyThrows
     public String issue(MemberPrincipal principal) {
-        var accesses = principal.getFamilyAccesses();
         List<String> authorities = principal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
-        var familyAccessesJson = accesses == null ? null : objectMapper.writeValueAsString(accesses);
         return JWT.create()
                 .withSubject(String.valueOf(principal.getId()))
                 .withIssuedAt(Instant.now())
                 .withExpiresAt(Instant.now().plus(Duration.of(properties.getExpiresAt(), ChronoUnit.SECONDS)))
                 .withClaim("username", principal.getUsername())
                 .withClaim("superRole", authorities.getFirst())
-                .withClaim("familyAccesses", familyAccessesJson)
                 .sign(Algorithm.HMAC256(properties.getSecretKey()));
     }
 
