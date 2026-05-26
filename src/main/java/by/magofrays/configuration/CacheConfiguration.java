@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -23,17 +22,11 @@ public class CacheConfiguration {
     private Integer ttl;
 
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory cf){
+    public RedisCacheManager cacheManager(RedisConnectionFactory cf) {
 
         ObjectMapper mapper = new ObjectMapper();
-
-        mapper.activateDefaultTyping(
-                mapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL
-        );
-
-        GenericJackson2JsonRedisSerializer serializer =
-                new GenericJackson2JsonRedisSerializer(mapper);
+        Jackson2JsonRedisSerializer<Object> serializer =
+                new Jackson2JsonRedisSerializer<>(mapper, Object.class);
 
         RedisCacheConfiguration cfg = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(

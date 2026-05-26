@@ -31,7 +31,7 @@ public class FamilyPermissionEvaluator implements PermissionEvaluator {
             if (accesses == null) {
                 return false;
             }
-            return accesses.stream().anyMatch(access -> access.name().equals(permission.toString()));
+            return accesses.stream().anyMatch(access -> access.equals(permission));
         }
         return false;
     }
