@@ -2,3 +2,5 @@ databaseChangeLog:
   - includeAll:
       path: classpath:db/1.0
       context: prod, dev
+  - includeAll:
+      path: classpath:db/2.0

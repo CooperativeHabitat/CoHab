@@ -28,7 +28,7 @@ public class AccessService {
         var familyMember = memberRepository.findByMember_IdAndFamily_Id(memberId, familyId).orElseThrow(
                 () -> new BusinessException(HttpStatus.BAD_REQUEST, "Не удалось найти пользователя " + memberId + " в семье " + familyId + "!")
         );
-        return familyMember.getRoles().stream().flatMap(role -> role.getAccessList().stream()).map(Enum::name).distinct().collect(Collectors.toList());
+        return familyMember.getRoles().stream().flatMap(role -> role.getAccessList().stream()).distinct().collect(Collectors.toList());
     }
 
 }

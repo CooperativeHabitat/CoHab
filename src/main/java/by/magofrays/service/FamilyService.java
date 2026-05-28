@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -184,9 +185,9 @@ public class FamilyService {
                 .family(family)
                 .name(familyProperties.getAdminRoleName())
                 .accessList(
-                        List.of(
+                        Stream.of(
                                 Access.values()
-                        )
+                        ).map(Enum::name).toList()
                 )
                 .value(familyProperties.getAdminRoleValue()).build());
         Role member = roleRepository.save(Role.builder()
@@ -194,12 +195,15 @@ public class FamilyService {
                 .name(familyProperties.getUserRoleName())
                 .value(familyProperties.getUserRoleValue())
                 .accessList(
-                        List.of(
+                        Stream.of(
                                 Access.CREATE_TASK,
                                 Access.ASSIGN_TASK,
                                 Access.SHOW_MEMBERS,
-                                Access.GENERATE_INVITE_LINK
-                        )
+                                Access.GENERATE_INVITE_LINK,
+                                Access.SHOW_CHAT,
+                                Access.CREATE_MESSAGE,
+                                Access.REACT_MESSAGE
+                        ).map(Enum::name).toList()
                 ).build());
         notificationService.sendNotificationFamily("create-role",
                 "Базовые роли %s, %s были созданы".formatted(member.getName(), admin.getName()),

@@ -1,14 +1,10 @@
 package by.magofrays.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import by.magofrays.entity.converters.AccessListConverter;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +27,7 @@ public class Role {
     Family family;
 
     @Builder.Default
-    private List<Access> accessList = new ArrayList<>();
+    private List<String> accessList = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

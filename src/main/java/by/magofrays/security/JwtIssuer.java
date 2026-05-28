@@ -31,7 +31,7 @@ public class JwtIssuer {
                 .withExpiresAt(Instant.now().plus(Duration.of(properties.getExpiresAt(), ChronoUnit.SECONDS)))
                 .withClaim("username", principal.getUsername())
                 .withClaim("superRole", authorities.getFirst())
-                .sign(Algorithm.HMAC256(properties.getSecretKey()));
+                .sign(Algorithm.RSA256(properties.getPrivateKey()));
     }
 
 

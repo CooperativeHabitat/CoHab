@@ -19,7 +19,9 @@ public enum Access {
     ASSIGN_TASK,
     // messages
     DELETE_MESSAGE,
-    REACT_MESSAGE;
+    REACT_MESSAGE,
+    CREATE_MESSAGE,
+    EDIT_MESSAGE;
 
     public String getAuthority() {
         return this.name();

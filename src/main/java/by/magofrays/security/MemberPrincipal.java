@@ -1,7 +1,6 @@
 package by.magofrays.security;
 
 
-import by.magofrays.entity.Access;
 import by.magofrays.entity.SuperRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
@@ -10,7 +9,6 @@ import lombok.Getter;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Builder
