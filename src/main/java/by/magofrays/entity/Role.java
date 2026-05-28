@@ -1,10 +1,7 @@
 package by.magofrays.entity;
 
-import by.magofrays.entity.converters.AccessListConverter;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
 import java.util.List;
