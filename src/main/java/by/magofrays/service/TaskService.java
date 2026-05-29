@@ -136,7 +136,9 @@ public class TaskService {
     public void markOrCheckTask(MarkCheckTaskRequest markTaskDto, UUID memberId) {
         var task = getTask(markTaskDto.taskId());
         String result = "";
+        boolean isMarked = false;
         if (markTaskDto.taskMarked() != null) {
+            isMarked = true;
             if (!task.getIssuedTo().getMember().getId().equals(memberId)) {
 
                 throw new BusinessException(HttpStatus.BAD_REQUEST,
@@ -174,12 +176,12 @@ public class TaskService {
         task = taskRepository.save(task);
         notificationService.sendNotificationTask("mark-check-task",
                 "%s %s %s"
-                        .formatted(task.getIssuedTo().getMember().getUsername(),
+                        .formatted(isMarked ? task.getCreatedBy().getMember().getUsername() : task.getIssuedTo().getMember().getUsername(),
                                 result,
                                 task.getTaskName()),
                 this.getClass().getName(),
                 task,
-                task.getCreatedBy().getMember().getId());
+                isMarked ? task.getIssuedTo().getMember().getId() : task.getCreatedBy().getMember().getId());
 
     }
 
