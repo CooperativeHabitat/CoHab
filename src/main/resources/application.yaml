@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
   threads:
     virtual:
@@ -11,40 +11,39 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/${COHAB_DB}
-    username: ${COHAB_DB_USER}
-    password: ${COHAB_DB_PASSWORD}
+    url: jdbc:postgresql://${COHAB_DB_CONTAINER_NAME:localhost}:${COHAB_DB_PORT:5432}/${COHAB_DB:cohab}
+    username: ${COHAB_DB_USER:magofrays}
+    password: ${COHAB_DB_PASSWORD:labubu}
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: ${SHOW_SQL}
+    show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
-        format_sql: ${SHOW_SQL}
+        format_sql: ${SHOW_SQL:true}
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: public
-    contexts: dev
 
   data:
     redis:
-      timeout: 60000
-      port: 6379
-      host: localhost
+      timeout: ${REDIS_TIMEOUT:60000}
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_CONTAINER_NAME:localhost}
 
 server:
-  port: ${COHAB_SERVER_PORT}
+  port: ${COHAB_SERVER_PORT:8080}
   address: 0.0.0.0
 
 logging:
   level:
-    org.springframework.security: ${LOGGING_LEVEL}
-    by.magofrays: ${LOGGING_LEVEL}
-    org.apache.kafka: INFO
+    org.springframework.security: ${LOGGING_LEVEL:INFO}
+    by.magofrays: ${LOGGING_LEVEL:INFO}
+    org.apache.kafka: ${LOGGING_LEVEL:INFO}
 
 user:
   max-families: 5
@@ -62,16 +61,16 @@ kafka:
 
 redis:
   cache:
-    ttl: ${JWT_EXPIRES_AT}
+    ttl: ${JWT_EXPIRES_AT:86400}
 
 security:
   jwt:
     public-key: classpath:certs/public.pem
     private-key: classpath:certs/private.pem
-    expires-at: ${JWT_EXPIRES_AT}
+    expires-at: ${JWT_EXPIRES_AT:86400}
   cors:
-    allowed-origins: ${ALLOWED_ORIGINS}
-    allowed-methods: ${ALLOWED_METHODS}
+    allowed-origins: ${ALLOWED_ORIGINS:localhost:5173}
+    allowed-methods: ${ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}
     allowed-headers: "*"
     allow-credentials: true
     max-age: 3600
