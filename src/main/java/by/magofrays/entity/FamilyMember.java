@@ -1,12 +1,6 @@
 package by.magofrays.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -32,7 +26,7 @@ public class FamilyMember {
     private Family family;
 
     @Builder.Default
-    @ManyToMany
+    @ManyToMany(mappedBy = "familyMembers")
     private List<Role> roles = new ArrayList<>();
 
     @Builder.Default
@@ -44,4 +38,8 @@ public class FamilyMember {
     private List<Task> issuedTasks = new ArrayList<>();
 
     private LocalDateTime addedAt;
+
+    public void addRole(Role role) {
+        roles.add(role);
+    }
 }

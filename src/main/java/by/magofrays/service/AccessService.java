@@ -5,6 +5,8 @@ import by.magofrays.exception.BusinessException;
 import by.magofrays.repository.FamilyMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,16 @@ public class AccessService {
                 () -> new BusinessException(HttpStatus.BAD_REQUEST, "Не удалось найти пользователя " + memberId + " в семье " + familyId + "!")
         );
         return familyMember.getRoles().stream().flatMap(role -> role.getAccessList().stream()).distinct().collect(Collectors.toList());
+    }
+
+    @Transactional
+    @CacheEvict(value = "family:accesses", key = "#familyId + ':' + #memberId", beforeInvocation = true)
+    public List<String> updateAccesses(UUID familyId, UUID memberId){
+        var familyMember = memberRepository.findByMember_IdAndFamily_Id(memberId, familyId).orElseThrow(
+                () -> new BusinessException(HttpStatus.BAD_REQUEST, "Не удалось найти пользователя " + memberId + " в семье " + familyId + "!")
+        );
+        return familyMember.getRoles().stream().flatMap(role -> role.getAccessList().stream()).distinct().collect(Collectors.toList());
+
     }
 
 }

@@ -1,6 +1,8 @@
 package by.magofrays.controller;
 
+import by.magofrays.dto.request.AttachRoleRequest;
 import by.magofrays.dto.request.CreateUpdateRoleRequest;
+import by.magofrays.dto.response.ReadFamilyMemberDto;
 import by.magofrays.dto.response.RoleDto;
 import by.magofrays.entity.Access;
 import by.magofrays.service.RoleService;
@@ -24,26 +26,41 @@ public class RoleController {
 
     @GetMapping("{familyId}")
     @PreAuthorize("hasAuthority('USER') && hasPermission(#familyId, 'family', 'SHOW_ROLES')")
-    public ResponseEntity<List<RoleDto>> getFamilyRoles(@PathVariable @NotNull UUID familyId){
+    public ResponseEntity<List<RoleDto>> getFamilyRoles(@PathVariable @NotNull UUID familyId) {
         return ResponseEntity.ok(roleService.getFamilyRoles(familyId));
     }
 
     @GetMapping("/accesses")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<List<Access>> getAccesses(){
+    public ResponseEntity<List<Access>> getAccesses() {
         return ResponseEntity.ok(List.of(Access.values()));
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
-    public ResponseEntity<RoleDto> createRole(@RequestBody @Validated CreateUpdateRoleRequest request){
+    public ResponseEntity<RoleDto> createRole(@RequestBody @Validated CreateUpdateRoleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.createRole(request));
     }
 
     @PutMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
-    public ResponseEntity<RoleDto> updateRole(@RequestBody @Validated CreateUpdateRoleRequest request){
+    public ResponseEntity<RoleDto> updateRole(@RequestBody @Validated CreateUpdateRoleRequest request) {
         return ResponseEntity.ok(roleService.updateRole(request));
     }
 
+    @PostMapping("/attach")
+    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_MEMBER_ROLES')")
+    public ResponseEntity<ReadFamilyMemberDto> attachRole(
+            @RequestBody @Validated AttachRoleRequest request
+    ) {
+        return ResponseEntity.ok(roleService.attachRoleToMember(request));
+    }
+
+    @PostMapping("/detach")
+    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_MEMBER_ROLES')")
+    public ResponseEntity<ReadFamilyMemberDto> detachRole(
+            @RequestBody @Validated AttachRoleRequest request
+    ) {
+        return ResponseEntity.ok(roleService.detachRoleFromMember(request));
+    }
 }

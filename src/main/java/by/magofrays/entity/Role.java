@@ -3,9 +3,7 @@ package by.magofrays.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -38,5 +36,13 @@ public class Role {
     public void setFamily(Family family) {
         this.family = family;
         family.getRoles().add(this);
+    }
+
+    public void addFamilyMember(FamilyMember familyMember){
+        familyMembers.add(familyMember);
+    }
+
+    public void removeFamilyMember(FamilyMember familyMember) {
+        familyMembers.remove(familyMember);
     }
 }
