@@ -1,7 +1,7 @@
 package by.magofrays.service;
 
 import by.magofrays.configuration.FamilyProperties;
-import by.magofrays.dto.request.CreateRoleRequest;
+import by.magofrays.dto.request.CreateUpdateRoleRequest;
 import by.magofrays.dto.response.RoleDto;
 import by.magofrays.entity.Access;
 import by.magofrays.entity.Family;
@@ -70,12 +70,12 @@ public class RoleService {
 
 
     @Transactional
-    public RoleDto createRole(CreateRoleRequest request) {
+    public RoleDto createRole(CreateUpdateRoleRequest request) {
         log.debug("Trying to create role {} for family {}", request.roleName(), request.familyId());
         var family = familyRepository.findById(request.familyId())
                 .orElseThrow(() ->
-                        new BusinessException(HttpStatus.NOT_FOUND, "Семьи с id" + request.familyId() + "не существует"));
-        if(roleRepository.findByNameAndFamily_Id(request.roleName(), request.familyId()).isPresent()){
+                        new BusinessException(HttpStatus.NOT_FOUND, "Семьи с id " + request.familyId() + " не существует"));
+        if (roleRepository.findByNameAndFamily_Id(request.roleName(), request.familyId()).isPresent()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST,
                     "Роль в семье %s с таким названием уже существует".formatted(request.familyId()));
         }
@@ -92,8 +92,24 @@ public class RoleService {
         return roleMapper.toDto(entity);
     }
 
+    @Transactional
+    public RoleDto updateRole(CreateUpdateRoleRequest request) {
+        log.debug("Trying to update role {} for family {}", request.roleName(), request.familyId());
+        var entity = roleRepository.findById(request.roleId())
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
+                        "Роль с id " + request.roleId() + " не существует"));
+        entity.setName(request.roleName());
+        entity.setAccessList(request.accesses().stream().map(Enum::name).toList());
+        entity.setValue(request.value());
+        entity = roleRepository.save(entity);
+        log.info("Role {} was updated", request.roleId());
+        return roleMapper.toDto(entity);
+    }
+
     public List<RoleDto> getFamilyRoles(UUID familyId) {
         log.info("Sending roles in family {}", familyId);
         return roleRepository.findByFamily_Id(familyId).stream().map(roleMapper::toDto).toList();
     }
+
+
 }

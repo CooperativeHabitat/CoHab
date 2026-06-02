@@ -33,14 +33,14 @@ public class MemberController {
 
     @GetMapping("/families")
     @PreAuthorize("hasAuthority('USER')")
-    public List<ReadFamilyMemberDto> getFamilies(@AuthenticationPrincipal MemberPrincipal principal) {
-        return memberService.getFamilyMembers(principal.getId());
+    public ResponseEntity<List<ReadFamilyMemberDto>> getFamilies(@AuthenticationPrincipal MemberPrincipal principal) {
+        return ResponseEntity.ok(memberService.getFamilyMembers(principal.getId()));
     }
 
     @GetMapping("/hasFamily")
     @PreAuthorize("hasAuthority('USER')")
-    public boolean hasFamily(@AuthenticationPrincipal MemberPrincipal principal) {
-        return memberService.memberHasFamily(principal.getId());
+    public ResponseEntity<Boolean> hasFamily(@AuthenticationPrincipal MemberPrincipal principal) {
+        return ResponseEntity.ok(memberService.memberHasFamily(principal.getId()));
     }
 
 }

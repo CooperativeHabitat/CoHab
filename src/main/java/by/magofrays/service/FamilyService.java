@@ -3,13 +3,10 @@ package by.magofrays.service;
 import by.magofrays.configuration.FamilyProperties;
 import by.magofrays.configuration.UserProperties;
 import by.magofrays.dto.request.CreateInvitationRequest;
-import by.magofrays.dto.request.CreateRoleRequest;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
-import by.magofrays.dto.response.RoleDto;
 import by.magofrays.entity.*;
 import by.magofrays.exception.BusinessException;
 import by.magofrays.mapper.MemberMapper;
-import by.magofrays.mapper.RoleMapper;
 import by.magofrays.repository.FamilyMemberRepository;
 import by.magofrays.repository.FamilyRepository;
 import by.magofrays.repository.MemberRepository;
@@ -17,7 +14,6 @@ import by.magofrays.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -28,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service

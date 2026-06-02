@@ -8,6 +8,8 @@ import by.magofrays.security.JwtIssuer;
 import by.magofrays.security.MemberPrincipal;
 import by.magofrays.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,7 +34,7 @@ public class AuthController {
 
     @PreAuthorize("isAnonymous()")
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody @Validated LoginRequest loginMemberDto) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Validated LoginRequest loginMemberDto) {
         var auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginMemberDto.username(), loginMemberDto.password())
         );
@@ -40,15 +42,15 @@ public class AuthController {
         var principal = (MemberPrincipal) auth.getPrincipal();
         var token = jwtIssuer.issue(principal);
         Instant expiresAt = jwtDecoder.decode(token).getExpiresAt().toInstant();
-        return LoginResponse.builder()
+        return ResponseEntity.ok(LoginResponse.builder()
                 .token(token)
                 .expiresAt(expiresAt.toString())
-                .build();
+                .build());
     }
 
     @PreAuthorize("isAnonymous()")
     @PostMapping("/registration")
-    public LoginResponse registration(@RequestBody @Validated RegistrationRequest registrationRequest) {
+    public ResponseEntity<LoginResponse> registration(@RequestBody @Validated RegistrationRequest registrationRequest) {
         var member = memberService.createMember(registrationRequest);
         var principal = MemberPrincipal.builder()
                 .id(member.id())
@@ -56,7 +58,8 @@ public class AuthController {
                 .superRole(member.superRole())
                 .build();
         var token = jwtIssuer.issue(principal);
-        return LoginResponse.builder().token(token).build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(LoginResponse.builder().token(token).build());
     }
 
     @PostMapping("/isAuthenticated")

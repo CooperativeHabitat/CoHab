@@ -10,6 +10,7 @@ import by.magofrays.service.TaskService;
 import by.magofrays.validation.UpdateGroup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -25,8 +26,9 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public List<ReadTaskDto> getTasksByMember(@AuthenticationPrincipal MemberPrincipal principal) {
-        return taskService.getTasksByIssuedToId(principal.getId());
+    public ResponseEntity<List<ReadTaskDto>> getTasksByMember(
+            @AuthenticationPrincipal MemberPrincipal principal) {
+        return ResponseEntity.ok(taskService.getTasksByIssuedToId(principal.getId()));
     }
 
     @PostMapping("/create")
@@ -34,10 +36,11 @@ public class TaskController {
                 hasAuthority('USER') && hasPermission(#createTaskDto.familyId, 'family', 'CREATE_TASK')
                 && (#createTaskDto.issuedTo == null || hasPermission(#createTaskDto.familyId, 'family', 'ASSIGN_TASK'))
             """)
-    public ReadTaskDto createTask(@AuthenticationPrincipal MemberPrincipal principal,
-                                  @Validated @RequestBody CreateUpdateTaskRequest createTaskDto) {
+    public ResponseEntity<ReadTaskDto> createTask(@AuthenticationPrincipal MemberPrincipal principal,
+                                                  @Validated @RequestBody CreateUpdateTaskRequest createTaskDto) {
         UUID memberId = principal.getId();
-        return taskService.createTask(createTaskDto, memberId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(taskService.createTask(createTaskDto, memberId));
     }
 
     @PutMapping("/update")
@@ -48,11 +51,11 @@ public class TaskController {
                         && (#updateTaskDto.issuedTo == null || hasPermission(#updateTaskDto.familyId, 'family', 'ASSIGN_TASK'))
                     """
     )
-    public ReadTaskDto changeTask(@AuthenticationPrincipal MemberPrincipal principal,
+    public ResponseEntity<ReadTaskDto> changeTask(@AuthenticationPrincipal MemberPrincipal principal,
                                   @Validated({UpdateGroup.class}) @RequestBody CreateUpdateTaskRequest updateTaskDto
                                   ) {
         UUID memberId = principal.getId();
-        return taskService.updateTask(updateTaskDto, memberId);
+        return ResponseEntity.ok(taskService.updateTask(updateTaskDto, memberId));
 
     }
 
@@ -73,9 +76,9 @@ public class TaskController {
     }
 
     @GetMapping("/{familyId}")
-    public List<ReadTaskDto> getFamilyTasks(@PathVariable UUID familyId,
+    public ResponseEntity<List<ReadTaskDto>> getFamilyTasks(@PathVariable UUID familyId,
                                             @AuthenticationPrincipal MemberPrincipal principal) {
-        return taskService.getFamilyTasks(familyId, principal.getId());
+        return ResponseEntity.ok(taskService.getFamilyTasks(familyId, principal.getId()));
     }
 
     @DeleteMapping
@@ -83,11 +86,12 @@ public class TaskController {
                 hasAuthority('USER') &&
                 (hasPermission(#deleteTaskRequest.familyId, 'family', 'DELETE_TASK') || taskService.isCreatedBy(#principal.id, #deleteTaskRequest.taskId))
             """)
-    public void deleteTask(
+    public ResponseEntity<?> deleteTask(
             @Validated @RequestBody DeleteTaskRequest deleteTaskRequest,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
         UUID memberId = principal.getId();
         taskService.deleteTask(deleteTaskRequest, memberId);
+        return ResponseEntity.noContent().build();
     }
 }

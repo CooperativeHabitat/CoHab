@@ -1,6 +1,6 @@
 package by.magofrays.mapper;
 
-import by.magofrays.dto.request.CreateRoleRequest;
+import by.magofrays.dto.request.CreateUpdateRoleRequest;
 import by.magofrays.dto.response.RoleDto;
 import by.magofrays.entity.Role;
 import org.mapstruct.Mapper;
@@ -13,5 +13,5 @@ public interface RoleMapper {
 
     @Mapping(target = "name", source = "roleName")
     @Mapping(target = "accessList", source = "accesses")
-    Role toEntity(CreateRoleRequest request);
+    Role toEntity(CreateUpdateRoleRequest request);
 }
