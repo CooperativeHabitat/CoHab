@@ -34,4 +34,9 @@ public class Role {
     )
     @Builder.Default
     private List<FamilyMember> familyMembers = new ArrayList<>();
+
+    public void setFamily(Family family) {
+        this.family = family;
+        family.getRoles().add(this);
+    }
 }

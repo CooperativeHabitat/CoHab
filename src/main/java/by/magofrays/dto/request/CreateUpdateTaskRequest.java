@@ -11,13 +11,13 @@ import java.util.UUID;
 public record CreateUpdateTaskRequest(
     @NotNull(groups = {Update.class})
     UUID taskId,
-    @NotBlank(message = "Название задачи должно быть не пустое!")
+    @NotBlank(message = "Название задачи должно быть корректным")
     String taskName,
     String description,
     @NotNull
     UUID familyId,
     UUID issuedTo,
-    @Future(message = "Дедлайн должен быть дальше текущего времени!")
+    @Future(message = "Дедлайн должен быть корректным")
     LocalDateTime dueDate
 ) {
 

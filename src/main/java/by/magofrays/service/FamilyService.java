@@ -3,11 +3,13 @@ package by.magofrays.service;
 import by.magofrays.configuration.FamilyProperties;
 import by.magofrays.configuration.UserProperties;
 import by.magofrays.dto.request.CreateInvitationRequest;
+import by.magofrays.dto.request.CreateRoleRequest;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
 import by.magofrays.dto.response.RoleDto;
 import by.magofrays.entity.*;
 import by.magofrays.exception.BusinessException;
 import by.magofrays.mapper.MemberMapper;
+import by.magofrays.mapper.RoleMapper;
 import by.magofrays.repository.FamilyMemberRepository;
 import by.magofrays.repository.FamilyRepository;
 import by.magofrays.repository.MemberRepository;
@@ -37,6 +39,7 @@ public class FamilyService {
     private final FamilyProperties familyProperties;
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
+    private final RoleMapper roleMapper;
     private final FamilyMemberRepository familyMemberRepository;
     private final ConcurrentHashMap<String, Invitation> invitationMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, String> familyInvitationMap = new ConcurrentHashMap<>();
@@ -87,7 +90,7 @@ public class FamilyService {
                 invitationMap.remove(entry.getKey());
                 familyInvitationMap.remove(entry.getValue().getFamilyId());
                 var family = familyRepository.findById(entry.getValue().getFamilyId());
-                if(family.isPresent()){
+                if (family.isPresent()) {
                     notificationService.sendNotificationFamily("delete-invitation",
                             "Код приглашение в семью был удален",
                             this.getClass().getName(),
@@ -145,7 +148,7 @@ public class FamilyService {
         var owner = memberRepository.findById(memberId).orElseThrow(
                 () -> new BusinessException(HttpStatus.NOT_FOUND, "Пользователь с id: " + memberId + " не существует."));
         var family = Family.builder().familyName(familyName).createdBy(owner).build();
-             if (owner.getFamilyMembers().size() > userProperties.getMaxFamilies() && owner.getSuperRole().equals(SuperRole.USER)) {
+        if (owner.getFamilyMembers().size() > userProperties.getMaxFamilies() && owner.getSuperRole().equals(SuperRole.USER)) {
             log.debug("Member: {} can not create family, because has max families", memberId);
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Пользователь не может создать более " + userProperties.getMaxFamilies() + " семей!");
         }
@@ -179,6 +182,7 @@ public class FamilyService {
     }
 
 
+    @Transactional
     private List<Role> createBaseRoles(Family family) {
         log.debug("Creating base roles for family: {}", family.getId());
         Role admin = roleRepository.save(Role.builder()
@@ -198,11 +202,13 @@ public class FamilyService {
                         Stream.of(
                                 Access.CREATE_TASK,
                                 Access.ASSIGN_TASK,
+                                Access.SHOW_TASKS,
                                 Access.SHOW_MEMBERS,
                                 Access.GENERATE_INVITE_LINK,
                                 Access.SHOW_CHAT,
                                 Access.CREATE_MESSAGE,
-                                Access.REACT_MESSAGE
+                                Access.REACT_MESSAGE,
+                                Access.SHOW_ROLES
                         ).map(Enum::name).toList()
                 ).build());
         notificationService.sendNotificationFamily("create-role",
@@ -214,7 +220,25 @@ public class FamilyService {
         return List.of(admin, member);
     }
 
-    public List<Access> createRole(RoleDto role){
-        return null;
+    @Transactional
+    public RoleDto createRole(CreateRoleRequest request) {
+        var family = familyRepository.findById(request.familyId())
+                .orElseThrow(() ->
+                        new BusinessException(HttpStatus.NOT_FOUND, "Семьи с id" + request.familyId() + "не существует"));
+        var entity = roleMapper.toEntity(request);
+        entity.setFamily(family);
+        entity =roleRepository.save(entity);
+        notificationService.sendNotificationFamily("create-role",
+                "Роль %s была создана".formatted(entity.getName()),
+                getClass().getName(),
+                family,
+                null
+        );
+
+        return roleMapper.toDto(entity);
+    }
+
+    public List<RoleDto> getFamilyRoles(UUID familyId) {
+        return roleRepository.findByFamily_Id(familyId).stream().map(roleMapper::toDto).toList();
     }
 }

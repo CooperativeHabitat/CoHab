@@ -4,8 +4,9 @@ public enum Access {
     // admin
     ADD_MEMBER,
     REMOVE_MEMBER,
-    RENAME_FAMILY,
+    UPDATE_FAMILY,
     MANAGE_ROLE,
+    SHOW_ROLES,
     MANAGE_MEMBER_ROLES,
     GENERATE_INVITE_LINK,
     // constraints
@@ -21,9 +22,5 @@ public enum Access {
     DELETE_MESSAGE,
     REACT_MESSAGE,
     CREATE_MESSAGE,
-    EDIT_MESSAGE;
-
-    public String getAuthority() {
-        return this.name();
-    }
+    EDIT_MESSAGE
 }

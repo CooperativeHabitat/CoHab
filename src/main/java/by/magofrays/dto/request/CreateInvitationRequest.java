@@ -1,9 +1,6 @@
 package by.magofrays.dto.request;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,10 +8,9 @@ import java.util.UUID;
 public record CreateInvitationRequest(
     @NotNull
     UUID familyId,
-    @Min(0)
-    @Max(15)
+    @Size(min = 1, max = 15, message = "Число пользователей должно быть в диапазоне от 1 до 15")
     Integer numMembers,
-    @Future
+    @Future(message = "Дата окончания должна быть корректной")
     @NotNull
     LocalDateTime expiresAt
 ){}

@@ -33,6 +33,9 @@ public class Family {
     @ManyToOne
     private Member createdBy;
 
+    @OneToMany(mappedBy = "family")
+    private List<Role> roles;
+
     public void addMember(FamilyMember familyMember) {
         familyMember.setAddedAt(LocalDateTime.now());
         members.add(familyMember);

@@ -6,5 +6,6 @@ import java.util.UUID;
 
 public record DeleteTaskRequest(
         @NotNull UUID taskId,
-        @NotNull UUID familyId) {
+        @NotNull UUID familyId
+) {
 }

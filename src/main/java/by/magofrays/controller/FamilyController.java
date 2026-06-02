@@ -1,6 +1,7 @@
 package by.magofrays.controller;
 
 import by.magofrays.dto.request.CreateInvitationRequest;
+import by.magofrays.dto.request.CreateRoleRequest;
 import by.magofrays.dto.request.InvitationRequest;
 import by.magofrays.dto.request.UpdateFamilyRequest;
 import by.magofrays.dto.response.ReadFamilyDto;
@@ -11,6 +12,7 @@ import by.magofrays.entity.Invitation;
 import by.magofrays.security.MemberPrincipal;
 import by.magofrays.service.FamilyService;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,19 +60,26 @@ public class FamilyController {
 
 
     @PutMapping("/change-name")
-    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'RENAME_FAMILY')")
-    public ReadFamilyDto update(UpdateFamilyRequest request) {
+    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'UPDATE_FAMILY')")
+    public ReadFamilyDto update(@RequestBody @Validated UpdateFamilyRequest request) {
         return null;
     }
 
-    @GetMapping("/role")
-    public List<RoleDto> getFamilyRoles(){
-        return null;
+    @GetMapping("/roles")
+    @PreAuthorize("hasAuthority('USER') && hasPermission(#familyId, 'family', 'SHOW_ROLES')")
+    public List<RoleDto> getFamilyRoles(@NotNull UUID familyId){
+        return familyService.getFamilyRoles(familyId);
+    }
+
+    @GetMapping("/accesses")
+    @PreAuthorize("hasAuthority('USER')")
+    public List<Access> getAccesses(){
+        return List.of(Access.values());
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'CREATE_ROLE')")
-    public List<Access> createRole(){
-        return null;
+    public RoleDto createRole(@RequestBody @Validated CreateRoleRequest createRoleRequest){
+        return familyService.createRole(createRoleRequest);
     }
 }

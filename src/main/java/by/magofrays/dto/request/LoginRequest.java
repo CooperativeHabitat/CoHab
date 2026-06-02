@@ -11,14 +11,14 @@ import lombok.Builder;
 @Builder
 public record LoginRequest(
         @Unique(
-                message = "Пользователь с таким никнеймом уже существует!",
+                message = "Пользователь с таким никнеймом уже существует",
                 entityClass = Member.class,
                 fieldName = "username",
                 groups = RegistrationGroup.class)
-        @NotBlank(message = "Никнейм не может быть пустым!")
+        @NotBlank(message = "Никнейм не может быть пустым")
         String username,
         @NotBlank(
-                message = "Введите пароль!",
+                message = "Введите пароль",
                 groups = {RegistrationGroup.class, LoginGroup.class})
         String password
 ) {
