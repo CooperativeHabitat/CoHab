@@ -1,5 +1,6 @@
 package by.magofrays.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ProblemDetail handle(BusinessException e) {
+        log.info("Sending error {} with response: {}", e.getErrorCode(), e.getMessage());
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 e.getErrorCode(),
                 e.getMessage()
@@ -29,6 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ProblemDetail handleBindException(BindException ex) {
+        log.info("Sending validation error response");
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Некорректно введенные данные."

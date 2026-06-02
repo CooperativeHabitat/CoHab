@@ -4,7 +4,7 @@ public enum Access {
     // admin
     ADD_MEMBER,
     REMOVE_MEMBER,
-    UPDATE_FAMILY,
+    RENAME_FAMILY,
     MANAGE_ROLE,
     SHOW_ROLES,
     MANAGE_MEMBER_ROLES,

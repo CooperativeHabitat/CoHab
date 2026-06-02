@@ -1,5 +1,6 @@
 package by.magofrays.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestControllerAdvice
 public class AuthExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied() {
+        log.info("Sending access denied error");
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
             HttpStatus.FORBIDDEN,
         "Проверьте наличие соответствующих прав для данной семьи"
@@ -28,33 +31,12 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ProblemDetail handleBadCredentials() {
+        log.info("Sending bad credentials error");
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED,
                 "Неверное имя пользователя или пароль"
         );
         problem.setTitle("BadCredentialsException");
-        problem.setProperty("timestamp", LocalDateTime.now());
-        return problem;
-    }
-
-    @ExceptionHandler(DisabledException.class)
-    public ProblemDetail handleDisabled() {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.FORBIDDEN,
-                "Ваш аккаунт отключён. Обратитесь в поддержку."
-        );
-        problem.setTitle("DisabledException");
-        problem.setProperty("timestamp", LocalDateTime.now());
-        return problem;
-    }
-
-    @ExceptionHandler(LockedException.class)
-    public ProblemDetail handleLocked() {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.FORBIDDEN,
-                "Аккаунт временно заблокирован из-за множества неудачных попыток входа."
-        );
-        problem.setTitle("LockedException");
         problem.setProperty("timestamp", LocalDateTime.now());
         return problem;
     }

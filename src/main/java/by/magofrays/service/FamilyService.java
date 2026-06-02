@@ -17,6 +17,7 @@ import by.magofrays.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,13 +40,14 @@ public class FamilyService {
     private final FamilyProperties familyProperties;
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
-    private final RoleMapper roleMapper;
     private final FamilyMemberRepository familyMemberRepository;
     private final ConcurrentHashMap<String, Invitation> invitationMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, String> familyInvitationMap = new ConcurrentHashMap<>();
     private final NotificationService notificationService;
+    private final RoleService roleService;
 
     public List<ReadFamilyMemberDto> getFamilyMembersByMemberId(UUID familyId) {
+        log.info("Sending family members from family {}", familyId);
         return familyMemberRepository.findByFamily_Id(familyId).stream().map(memberMapper::toDto).toList();
     }
 
@@ -153,7 +155,7 @@ public class FamilyService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Пользователь не может создать более " + userProperties.getMaxFamilies() + " семей!");
         }
         family = familyRepository.save(family);
-        var roles = createBaseRoles(family);
+        var roles = roleService.createBaseRoles(family);
         log.info("Member: {} created family: {}", memberId, family.getId());
         var ownerFamilyMember = addMemberToFamily(family, owner);
         ownerFamilyMember.getRoles().add(roles.getFirst());
@@ -182,63 +184,4 @@ public class FamilyService {
     }
 
 
-    @Transactional
-    private List<Role> createBaseRoles(Family family) {
-        log.debug("Creating base roles for family: {}", family.getId());
-        Role admin = roleRepository.save(Role.builder()
-                .family(family)
-                .name(familyProperties.getAdminRoleName())
-                .accessList(
-                        Stream.of(
-                                Access.values()
-                        ).map(Enum::name).toList()
-                )
-                .value(familyProperties.getAdminRoleValue()).build());
-        Role member = roleRepository.save(Role.builder()
-                .family(family)
-                .name(familyProperties.getUserRoleName())
-                .value(familyProperties.getUserRoleValue())
-                .accessList(
-                        Stream.of(
-                                Access.CREATE_TASK,
-                                Access.ASSIGN_TASK,
-                                Access.SHOW_TASKS,
-                                Access.SHOW_MEMBERS,
-                                Access.GENERATE_INVITE_LINK,
-                                Access.SHOW_CHAT,
-                                Access.CREATE_MESSAGE,
-                                Access.REACT_MESSAGE,
-                                Access.SHOW_ROLES
-                        ).map(Enum::name).toList()
-                ).build());
-        notificationService.sendNotificationFamily("create-role",
-                "Базовые роли %s, %s были созданы".formatted(member.getName(), admin.getName()),
-                getClass().getName(),
-                family,
-                null
-        );
-        return List.of(admin, member);
-    }
-
-    @Transactional
-    public RoleDto createRole(CreateRoleRequest request) {
-        var family = familyRepository.findById(request.familyId())
-                .orElseThrow(() ->
-                        new BusinessException(HttpStatus.NOT_FOUND, "Семьи с id" + request.familyId() + "не существует"));
-        var entity = roleMapper.toEntity(request);
-        entity.setFamily(family);
-        entity =roleRepository.save(entity);
-        notificationService.sendNotificationFamily("create-role",
-                "Роль %s была создана".formatted(entity.getName()),
-                getClass().getName(),
-                family,
-                null
-        );
-
-        return roleMapper.toDto(entity);
-    }
-
-    public List<RoleDto> getFamilyRoles(UUID familyId) {
-        return roleRepository.findByFamily_Id(familyId).stream().map(roleMapper::toDto).toList();
-    }
 }

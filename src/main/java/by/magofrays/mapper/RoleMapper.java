@@ -11,6 +11,7 @@ public interface RoleMapper {
 
     RoleDto toDto(Role role);
 
-    @Mapping(target = "name", source = "request.roleName")
+    @Mapping(target = "name", source = "roleName")
+    @Mapping(target = "accessList", source = "accesses")
     Role toEntity(CreateRoleRequest request);
 }

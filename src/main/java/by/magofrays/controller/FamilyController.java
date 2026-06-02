@@ -60,26 +60,8 @@ public class FamilyController {
 
 
     @PutMapping("/change-name")
-    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'UPDATE_FAMILY')")
+    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'RENAME_FAMILY')")
     public ReadFamilyDto update(@RequestBody @Validated UpdateFamilyRequest request) {
         return null;
-    }
-
-    @GetMapping("/roles")
-    @PreAuthorize("hasAuthority('USER') && hasPermission(#familyId, 'family', 'SHOW_ROLES')")
-    public List<RoleDto> getFamilyRoles(@NotNull UUID familyId){
-        return familyService.getFamilyRoles(familyId);
-    }
-
-    @GetMapping("/accesses")
-    @PreAuthorize("hasAuthority('USER')")
-    public List<Access> getAccesses(){
-        return List.of(Access.values());
-    }
-
-    @PostMapping
-    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'CREATE_ROLE')")
-    public RoleDto createRole(@RequestBody @Validated CreateRoleRequest createRoleRequest){
-        return familyService.createRole(createRoleRequest);
     }
 }

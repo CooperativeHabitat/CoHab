@@ -36,11 +36,8 @@ public class TaskService {
     public ReadTaskDto createTask(CreateUpdateTaskRequest taskDto, UUID memberId) {
         log.debug("Member: {} trying to create task", memberId);
         var createdBy = familyMemberRepository.findByMember_IdAndFamily_Id(memberId, taskDto.familyId())
-                .orElseThrow(() -> {
-                    log.debug("Member: {} for createdBy does not exist in family: {}", memberId, taskDto.familyId());
-                    return new BusinessException(HttpStatus.NOT_FOUND,
-                            "Пользователь с id: " + memberId + " не состоит в семье: " + taskDto.familyId());
-                });
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
+                        "Пользователь с id: " + memberId + " не состоит в семье: " + taskDto.familyId()));
 
         var task = taskMapper.toEntity(taskDto);
         if (taskDto.issuedTo() != null) {
@@ -51,11 +48,8 @@ public class TaskService {
                     .filter(member ->
                             member.getId().equals(taskDto.issuedTo()))
                     .findFirst()
-                    .orElseThrow(() -> {
-                        log.debug("Member: {} for issuedTo does not exist in family: {}", taskDto.issuedTo(), taskDto.familyId());
-                        return new BusinessException(HttpStatus.NOT_FOUND,
-                                "Пользователь с id: " + taskDto.issuedTo() + " не состоит в семье: " + taskDto.familyId());
-                    });
+                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
+                            "Пользователь с id: " + taskDto.issuedTo() + " не состоит в семье: " + taskDto.familyId()));
             task.setIssuedTo(issuedTo);
         } else {
             task.setIssuedTo(createdBy);
@@ -182,6 +176,7 @@ public class TaskService {
                 this.getClass().getName(),
                 task,
                 isMarked ? task.getIssuedTo().getMember().getId() : task.getCreatedBy().getMember().getId());
+        log.info("Member has commited '{}' to task {}", result, task.getId());
 
     }
 
@@ -191,6 +186,7 @@ public class TaskService {
             throw new BusinessException(HttpStatus.NOT_FOUND,
                     "Пользователь с id: " + memberId + " не состоит в семье, либо семьи с id: " + familyId + "не существует!");
         }
+        log.info("Sending tasks from family {} to member {}", familyId, memberId);
         return taskRepository
                 .getTasksByCreatedBy_Family_Id(familyId)
                 .stream()
@@ -205,6 +201,8 @@ public class TaskService {
                 .orElseThrow(
                         () -> new BusinessException(HttpStatus.NOT_FOUND,
                                 "Пользователь с id: " + memberId + " не состоит в семье, либо семьи с id: " + taskDto.familyId() + "не существует!"));
+        log.debug("Trying to delete task with id {}", taskDto.taskId());
+        taskRepository.delete(task);
         notificationService.sendNotificationFamily("delete-task",
                 "%s удалил задачу %s"
                         .formatted(familyMember.getMember().getUsername(), task.getTaskName()),
@@ -212,6 +210,6 @@ public class TaskService {
                 familyMember.getFamily(),
                 familyMember.getMember().getId()
         );
-        taskRepository.delete(task);
+        log.info("Task with id {} was deleted", taskDto.taskId());
     }
 }
