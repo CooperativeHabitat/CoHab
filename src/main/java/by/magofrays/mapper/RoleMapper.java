@@ -9,9 +9,11 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface RoleMapper {
 
+    @Mapping(target = "memberCount", expression = "java(role.getFamilyMembers().size())")
     RoleDto toDto(Role role);
 
     @Mapping(target = "name", source = "roleName")
     @Mapping(target = "accessList", source = "accesses")
     Role toEntity(CreateUpdateRoleRequest request);
+
 }

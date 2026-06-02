@@ -1,12 +1,9 @@
 package by.magofrays.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,7 +23,8 @@ public class Family {
 
     private String familyName;
 
-    @OneToMany(mappedBy = "family")
+    @OneToMany(mappedBy = "family", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
     @Builder.Default
     private List<FamilyMember> members = new ArrayList<>();
 

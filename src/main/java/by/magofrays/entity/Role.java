@@ -2,6 +2,8 @@ package by.magofrays.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 
@@ -24,12 +26,13 @@ public class Role {
     @Builder.Default
     private List<String> accessList = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "family_member_roles",
             joinColumns = @JoinColumn(name = "roles_id"),
             inverseJoinColumns = @JoinColumn(name = "family_member_id")
     )
+    @Fetch(FetchMode.SUBSELECT)
     @Builder.Default
     private List<FamilyMember> familyMembers = new ArrayList<>();
 

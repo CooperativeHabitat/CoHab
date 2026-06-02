@@ -15,6 +15,7 @@ public abstract class FamilyMapper {
     private MemberRepository memberRepository;
 
     @Mapping(target = "createdBy", expression = "java(family.getCreatedBy().getId())")
+    @Mapping(target = "memberCount", expression = "java(family.getMembers().size())")
     public abstract ReadFamilyDto toDto(Family family);
 
 }

@@ -15,4 +15,5 @@ public class RoleDto {
     private String name;
     private Integer value;
     private List<Access> accessList;
+    private Integer memberCount;
 }

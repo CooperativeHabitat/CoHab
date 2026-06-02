@@ -10,6 +10,7 @@ public record CreateUpdateFamilyRequest(
         @NotNull(groups = UpdateGroup.class)
         UUID familyId,
         @NotBlank(message = "Название семьи должно быть корректным")
+        @NotNull
         String familyName
 ) {
 

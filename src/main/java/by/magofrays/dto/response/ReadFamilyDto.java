@@ -5,6 +5,7 @@ import java.util.UUID;
 public record ReadFamilyDto(
         UUID id,
         String familyName,
-        UUID createdBy
+        UUID createdBy,
+        Integer memberCount
 ) {
 }

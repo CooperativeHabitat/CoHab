@@ -64,7 +64,7 @@ public class FamilyController {
     }
 
 
-    @PutMapping("/change-name")
+    @PutMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'RENAME_FAMILY')")
     public ResponseEntity<ReadFamilyMemberDto> update(
             @AuthenticationPrincipal MemberPrincipal principal,

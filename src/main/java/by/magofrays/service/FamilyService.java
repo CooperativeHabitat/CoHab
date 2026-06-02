@@ -154,6 +154,7 @@ public class FamilyService {
         log.info("Member: {} created family: {}", memberId, family.getId());
         var ownerFamilyMember = addMemberToFamily(family, owner);
         ownerFamilyMember.getRoles().add(roles.getFirst());
+        roles.getFirst().addFamilyMember(ownerFamilyMember);
         notificationService.sendNotificationFamily("create-family",
                 "Семья была создана",
                 getClass().getName(),
