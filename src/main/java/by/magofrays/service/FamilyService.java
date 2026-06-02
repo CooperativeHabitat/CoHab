@@ -3,14 +3,12 @@ package by.magofrays.service;
 import by.magofrays.configuration.FamilyProperties;
 import by.magofrays.configuration.UserProperties;
 import by.magofrays.dto.request.CreateInvitationRequest;
+import by.magofrays.dto.request.CreateUpdateFamilyRequest;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
 import by.magofrays.entity.*;
 import by.magofrays.exception.BusinessException;
 import by.magofrays.mapper.MemberMapper;
-import by.magofrays.repository.FamilyMemberRepository;
-import by.magofrays.repository.FamilyRepository;
-import by.magofrays.repository.MemberRepository;
-import by.magofrays.repository.RoleRepository;
+import by.magofrays.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -40,6 +38,8 @@ public class FamilyService {
     private final ConcurrentHashMap<UUID, String> familyInvitationMap = new ConcurrentHashMap<>();
     private final NotificationService notificationService;
     private final RoleService roleService;
+
+    private final TaskRepository taskRepository;
 
     public List<ReadFamilyMemberDto> getFamilyMembersByMemberId(UUID familyId) {
         log.info("Sending family members from family {}", familyId);
@@ -178,5 +178,29 @@ public class FamilyService {
         return familyMemberRepository.save(familyMember);
     }
 
+    @Transactional
+    public ReadFamilyMemberDto updateFamily(CreateUpdateFamilyRequest request, UUID memberId) {
+        var familyMember = familyMemberRepository.findByMember_IdAndFamily_Id(memberId, request.familyId())
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
+                        "Пользователь %s не состоит в семье %s".formatted(memberId, request.familyId())));
+        familyMember.getFamily().setFamilyName(request.familyName());
+        return memberMapper.toDto(familyMember);
+    }
 
+    @Transactional
+    public void deleteFamily(UUID familyId, UUID memberId) {
+        var familyMember = familyMemberRepository.findByMember_IdAndFamily_Id(memberId, familyId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
+                        "Пользователь %s не состоит в семье %s".formatted(memberId, familyId)));
+        var family = familyMember.getFamily();
+        var member = family.getCreatedBy();
+        if(member.getId().equals(memberId)){
+            // todo
+        } else {
+            family.getMembers().remove(familyMember);
+//            taskRepository.getTasksByCreatedBy_Family_Id(familyMember.getMember(), familyId);
+            // todo
+        }
+
+    }
 }

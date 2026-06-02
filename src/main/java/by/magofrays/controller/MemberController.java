@@ -1,5 +1,6 @@
 package by.magofrays.controller;
 
+import by.magofrays.dto.request.UpdatePersonalInfoRequest;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
 import by.magofrays.dto.response.ReadMemberDto;
 import by.magofrays.exception.BusinessException;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,6 +43,12 @@ public class MemberController {
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<Boolean> hasFamily(@AuthenticationPrincipal MemberPrincipal principal) {
         return ResponseEntity.ok(memberService.memberHasFamily(principal.getId()));
+    }
+
+    @PutMapping
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<ReadMemberDto> update(UpdatePersonalInfoRequest request) {
+        return ResponseEntity.ok(memberService.updatePersonalInfo(request));
     }
 
 }

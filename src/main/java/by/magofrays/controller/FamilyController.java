@@ -1,14 +1,16 @@
 package by.magofrays.controller;
 
 import by.magofrays.dto.request.CreateInvitationRequest;
+import by.magofrays.dto.request.CreateUpdateFamilyRequest;
 import by.magofrays.dto.request.InvitationRequest;
-import by.magofrays.dto.request.UpdateFamilyRequest;
 import by.magofrays.dto.response.ReadFamilyDto;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
 import by.magofrays.entity.Invitation;
 import by.magofrays.security.MemberPrincipal;
 import by.magofrays.service.FamilyService;
+import by.magofrays.validation.UpdateGroup;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,10 +39,10 @@ public class FamilyController {
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<ReadFamilyMemberDto> createFamily(@AuthenticationPrincipal MemberPrincipal principal,
-                                            @RequestBody @Validated @NotBlank String familyName) {
+                                                            @RequestBody @Validated CreateUpdateFamilyRequest request) {
         UUID memberId = principal.getId();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(familyService.createFamily(familyName, memberId));
+                .body(familyService.createFamily(request.familyName(), memberId));
     }
 
     @PostMapping("/create-invitation")
@@ -63,7 +66,21 @@ public class FamilyController {
 
     @PutMapping("/change-name")
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'RENAME_FAMILY')")
-    public ResponseEntity<ReadFamilyDto> update(@RequestBody @Validated UpdateFamilyRequest request) {
-        return null;
+    public ResponseEntity<ReadFamilyMemberDto> update(
+            @AuthenticationPrincipal MemberPrincipal principal,
+            @RequestBody @Validated({UpdateGroup.class}) CreateUpdateFamilyRequest request
+    ) {
+        UUID memberId = principal.getId();
+        return ResponseEntity.ok(familyService.updateFamily(request, memberId));
+    }
+
+    @DeleteMapping("/{familyId}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> delete(
+            @PathVariable @NotNull UUID familyId,
+            @AuthenticationPrincipal MemberPrincipal principal) {
+        var memberId = principal.getId();
+        familyService.deleteFamily(familyId, memberId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -6,6 +6,7 @@ import by.magofrays.dto.response.ReadFamilyMemberDto;
 import by.magofrays.dto.response.RoleDto;
 import by.magofrays.entity.Access;
 import by.magofrays.service.RoleService;
+import by.magofrays.validation.UpdateGroup;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,8 @@ public class RoleController {
 
     @PutMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
-    public ResponseEntity<RoleDto> updateRole(@RequestBody @Validated CreateUpdateRoleRequest request) {
+    public ResponseEntity<RoleDto> updateRole(
+            @RequestBody @Validated({UpdateGroup.class}) CreateUpdateRoleRequest request) {
         return ResponseEntity.ok(roleService.updateRole(request));
     }
 
