@@ -2,8 +2,9 @@ package by.magofrays.controller;
 
 import by.magofrays.dto.request.AttachRoleRequest;
 import by.magofrays.dto.request.CreateUpdateRoleRequest;
+import by.magofrays.dto.response.AccessResponse;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
-import by.magofrays.dto.response.RoleDto;
+import by.magofrays.dto.response.RoleResponse;
 import by.magofrays.entity.Access;
 import by.magofrays.service.RoleService;
 import by.magofrays.validation.UpdateGroup;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,25 +29,30 @@ public class RoleController {
 
     @GetMapping("{familyId}")
     @PreAuthorize("hasAuthority('USER') && hasPermission(#familyId, 'family', 'SHOW_ROLES')")
-    public ResponseEntity<List<RoleDto>> getFamilyRoles(@PathVariable @NotNull UUID familyId) {
+    public ResponseEntity<List<RoleResponse>> getFamilyRoles(@PathVariable @NotNull UUID familyId) {
         return ResponseEntity.ok(roleService.getFamilyRoles(familyId));
     }
 
     @GetMapping("/accesses")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<List<Access>> getAccesses() {
-        return ResponseEntity.ok(List.of(Access.values()));
+    public ResponseEntity<List<AccessResponse>> getAccesses() {
+        return ResponseEntity.ok(Stream.of(Access.values())
+                .map(access ->
+                        new AccessResponse(
+                                access.name(),
+                                access.getDescription()))
+                .toList());
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
-    public ResponseEntity<RoleDto> createRole(@RequestBody @Validated CreateUpdateRoleRequest request) {
+    public ResponseEntity<RoleResponse> createRole(@RequestBody @Validated CreateUpdateRoleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.createRole(request));
     }
 
     @PutMapping
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
-    public ResponseEntity<RoleDto> updateRole(
+    public ResponseEntity<RoleResponse> updateRole(
             @RequestBody @Validated({UpdateGroup.class}) CreateUpdateRoleRequest request) {
         return ResponseEntity.ok(roleService.updateRole(request));
     }

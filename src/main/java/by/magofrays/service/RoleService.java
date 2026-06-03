@@ -4,7 +4,7 @@ import by.magofrays.configuration.FamilyProperties;
 import by.magofrays.dto.request.AttachRoleRequest;
 import by.magofrays.dto.request.CreateUpdateRoleRequest;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
-import by.magofrays.dto.response.RoleDto;
+import by.magofrays.dto.response.RoleResponse;
 import by.magofrays.entity.Access;
 import by.magofrays.entity.Family;
 import by.magofrays.entity.Role;
@@ -77,7 +77,7 @@ public class RoleService {
 
 
     @Transactional
-    public RoleDto createRole(CreateUpdateRoleRequest request) {
+    public RoleResponse createRole(CreateUpdateRoleRequest request) {
         log.debug("Trying to create role {} for family {}", request.roleName(), request.familyId());
         var family = familyRepository.findById(request.familyId())
                 .orElseThrow(() ->
@@ -100,7 +100,7 @@ public class RoleService {
     }
 
     @Transactional
-    public RoleDto updateRole(CreateUpdateRoleRequest request) {
+    public RoleResponse updateRole(CreateUpdateRoleRequest request) {
         log.debug("Trying to update role {} for family {}", request.roleName(), request.familyId());
         var entity = roleRepository.findById(request.roleId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
@@ -113,7 +113,7 @@ public class RoleService {
         return roleMapper.toDto(entity);
     }
 
-    public List<RoleDto> getFamilyRoles(UUID familyId) {
+    public List<RoleResponse> getFamilyRoles(UUID familyId) {
         log.info("Sending roles in family {}", familyId);
         return roleRepository.findByFamily_Id(familyId).stream().map(roleMapper::toDto).toList();
     }
