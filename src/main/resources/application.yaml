@@ -49,9 +49,9 @@ user:
   max-families: 5
 
 family:
-  admin-role-name: ADMIN
+  admin-role-name: Админ
   admin-role-value: 100
-  user-role-name: MEMBER
+  user-role-name: Участник
   user-role-value: 10
   max-member-num: 20
 

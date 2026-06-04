@@ -1,5 +1,6 @@
 package by.magofrays.controller;
 
+import by.magofrays.dto.request.DeleteRoleRequest;
 import by.magofrays.dto.request.AttachRoleRequest;
 import by.magofrays.dto.request.CreateUpdateRoleRequest;
 import by.magofrays.dto.response.AccessResponse;
@@ -48,6 +49,13 @@ public class RoleController {
     @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
     public ResponseEntity<RoleResponse> createRole(@RequestBody @Validated CreateUpdateRoleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.createRole(request));
+    }
+
+    @DeleteMapping
+    @PreAuthorize("hasAuthority('USER') && hasPermission(#request.familyId, 'family', 'MANAGE_ROLE')")
+    public ResponseEntity<?> deleteRole(@RequestBody @Validated DeleteRoleRequest request) {
+        roleService.deleteRole(request);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping

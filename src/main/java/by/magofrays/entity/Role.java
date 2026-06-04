@@ -48,4 +48,11 @@ public class Role {
     public void removeFamilyMember(FamilyMember familyMember) {
         familyMembers.remove(familyMember);
     }
+
+    @PreRemove
+    private void preRemove() {
+        for (FamilyMember member : familyMembers) {
+            member.getRoles().remove(this);
+        }
+    }
 }
