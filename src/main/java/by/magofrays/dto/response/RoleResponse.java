@@ -10,10 +10,10 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class RoleDto {
+public class RoleResponse {
     private UUID id;
     private String name;
     private Integer value;
-    private List<Access> accessList;
+    private List<AccessResponse> accessList;
     private Integer memberCount;
 }

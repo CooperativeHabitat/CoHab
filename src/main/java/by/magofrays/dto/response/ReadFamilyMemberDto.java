@@ -14,6 +14,6 @@ public class ReadFamilyMemberDto {
     String username;
     PersonalInfoDto personalInfo;
     ReadFamilyDto family;
-    List<RoleDto> roles;
+    List<RoleResponse> roles;
     private LocalDateTime addedAt;
 }

@@ -1,10 +1,11 @@
 package by.magofrays.service;
 
 import by.magofrays.configuration.FamilyProperties;
+import by.magofrays.dto.request.DeleteRoleRequest;
 import by.magofrays.dto.request.AttachRoleRequest;
 import by.magofrays.dto.request.CreateUpdateRoleRequest;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
-import by.magofrays.dto.response.RoleDto;
+import by.magofrays.dto.response.RoleResponse;
 import by.magofrays.entity.Access;
 import by.magofrays.entity.Family;
 import by.magofrays.entity.Role;
@@ -77,7 +78,7 @@ public class RoleService {
 
 
     @Transactional
-    public RoleDto createRole(CreateUpdateRoleRequest request) {
+    public RoleResponse createRole(CreateUpdateRoleRequest request) {
         log.debug("Trying to create role {} for family {}", request.roleName(), request.familyId());
         var family = familyRepository.findById(request.familyId())
                 .orElseThrow(() ->
@@ -100,7 +101,7 @@ public class RoleService {
     }
 
     @Transactional
-    public RoleDto updateRole(CreateUpdateRoleRequest request) {
+    public RoleResponse updateRole(CreateUpdateRoleRequest request) {
         log.debug("Trying to update role {} for family {}", request.roleName(), request.familyId());
         var entity = roleRepository.findById(request.roleId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
@@ -113,23 +114,23 @@ public class RoleService {
         return roleMapper.toDto(entity);
     }
 
-    public List<RoleDto> getFamilyRoles(UUID familyId) {
+    public List<RoleResponse> getFamilyRoles(UUID familyId) {
         log.info("Sending roles in family {}", familyId);
         return roleRepository.findByFamily_Id(familyId).stream().map(roleMapper::toDto).toList();
     }
 
     @Transactional
-    public ReadFamilyMemberDto attachRoleToMember(AttachRoleRequest request){
+    public ReadFamilyMemberDto attachRoleToMember(AttachRoleRequest request) {
         log.debug("Trying to attach role '{}' to familyMember {}", request.roleName(), request.familyId());
         var familyMemberEntity = familyMemberRepository.findById(request.familyMemberId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
                         "Члена семьи с id: " + request.familyMemberId() + " не существует"
-                        ));
+                ));
         var roleEntity = roleRepository.findByNameAndFamily_Id(request.roleName(), request.familyId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
                         "Роли %s не существует в семье %s".formatted(request.roleName(), request.familyId())));
 
-        if(familyMemberEntity.getRoles().contains(roleEntity)){
+        if (familyMemberEntity.getRoles().contains(roleEntity)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST,
                     "Роль '%s' уже назначена на члена семьи: %s".formatted(
                             request.roleName(),
@@ -150,7 +151,7 @@ public class RoleService {
     }
 
     @Transactional
-    public ReadFamilyMemberDto detachRoleFromMember(AttachRoleRequest request){
+    public ReadFamilyMemberDto detachRoleFromMember(AttachRoleRequest request) {
         log.debug("Trying to detach role '{}' to familyMember {}", request.roleName(), request.familyId());
         var familyMemberEntity = familyMemberRepository.findById(request.familyMemberId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
@@ -159,7 +160,7 @@ public class RoleService {
         var roleEntity = roleRepository.findByNameAndFamily_Id(request.roleName(), request.familyId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
                         "Роли %s не существует в семье %s".formatted(request.roleName(), request.familyId())));
-        if(!familyMemberEntity.getRoles().contains(roleEntity)){
+        if (!familyMemberEntity.getRoles().contains(roleEntity)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST,
                     "Роль '%s' не назначена на члена семьи: %s".formatted(
                             request.roleName(),
@@ -179,5 +180,11 @@ public class RoleService {
         return familyMemberMapper.toDto(familyMemberEntity);
     }
 
-
+    @Transactional
+    public void deleteRole(DeleteRoleRequest roleRequest) {
+        var role = roleRepository.findById(roleRequest.roleId()).orElseThrow(() ->
+                new BusinessException(HttpStatus.NOT_FOUND,
+                        "Роль %s не существует".formatted(roleRequest.roleId())));
+        roleRepository.delete(role);
+    }
 }

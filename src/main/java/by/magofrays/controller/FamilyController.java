@@ -3,10 +3,13 @@ package by.magofrays.controller;
 import by.magofrays.dto.request.CreateInvitationRequest;
 import by.magofrays.dto.request.CreateUpdateFamilyRequest;
 import by.magofrays.dto.request.InvitationRequest;
+import by.magofrays.dto.response.AccessResponse;
 import by.magofrays.dto.response.ReadFamilyDto;
 import by.magofrays.dto.response.ReadFamilyMemberDto;
+import by.magofrays.entity.Access;
 import by.magofrays.entity.Invitation;
 import by.magofrays.security.MemberPrincipal;
+import by.magofrays.service.AccessService;
 import by.magofrays.service.FamilyService;
 import by.magofrays.validation.UpdateGroup;
 import jakarta.validation.constraints.NotBlank;
@@ -29,11 +32,26 @@ import java.util.UUID;
 @RequestMapping("api/family")
 public class FamilyController {
     private final FamilyService familyService;
+    private final AccessService accessService;
 
     @GetMapping("{familyId}/members")
     @PreAuthorize("hasAuthority('USER') && hasPermission(#familyId, 'family', 'SHOW_MEMBERS')")
     public ResponseEntity<List<ReadFamilyMemberDto>> getFamilyMembers(@PathVariable UUID familyId) {
         return ResponseEntity.ok(familyService.getFamilyMembersByMemberId(familyId));
+    }
+
+    @GetMapping("/{familyId}/accesses")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<List<AccessResponse>> getMemberAccesses(
+            @PathVariable UUID familyId,
+            @AuthenticationPrincipal MemberPrincipal principal) {
+        UUID memberId = principal.getId();
+        return ResponseEntity.ok(
+                accessService.getAccessesByFamilyAndMemberId(familyId, memberId).stream()
+                        .map(Access::valueOf)
+                        .map(access -> new AccessResponse(access.name(), access.getDescription()))
+                        .toList()
+        );
     }
 
     @PostMapping("/create")
