@@ -70,6 +70,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: cohab-back
     environment:
       - COHAB_DB=${COHAB_DB}
       - COHAB_DB_PASSWORD=${COHAB_DB_PASSWORD}

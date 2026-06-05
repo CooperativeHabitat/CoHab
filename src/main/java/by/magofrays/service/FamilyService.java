@@ -194,8 +194,8 @@ public class FamilyService {
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
                         "Пользователь %s не состоит в семье %s".formatted(memberId, familyId)));
         var family = familyMember.getFamily();
-        var member = family.getCreatedBy();
-        if(member.getId().equals(memberId)){
+        var createdBy = family.getCreatedBy();
+        if(createdBy.getId().equals(memberId)){
             // todo
         } else {
             family.getMembers().remove(familyMember);
