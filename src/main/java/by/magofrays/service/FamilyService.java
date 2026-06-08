@@ -39,8 +39,6 @@ public class FamilyService {
     private final NotificationService notificationService;
     private final RoleService roleService;
 
-    private final TaskRepository taskRepository;
-
     public List<ReadFamilyMemberDto> getFamilyMembersByMemberId(UUID familyId) {
         log.info("Sending family members from family {}", familyId);
         return familyMemberRepository.findByFamily_Id(familyId).stream().map(memberMapper::toDto).toList();
@@ -173,7 +171,8 @@ public class FamilyService {
         var role = roleRepository.findByNameAndFamily_Id(familyProperties.getUserRoleName(),
                         family.getId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Отсутствует основная роль: " + familyProperties.getUserRoleName()));
-        familyMember.getRoles().add(role);
+        role.addFamilyMember(familyMember);
+        familyMember.addRole(role);
         member.getFamilyMembers().add(familyMember);
         family.addMember(familyMember);
         return familyMemberRepository.save(familyMember);

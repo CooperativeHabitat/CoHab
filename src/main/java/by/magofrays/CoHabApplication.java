@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class CoHabApplication {
 
-	public static void main(String[] args) {
+    static void main(String[] args) {
 
-		SpringApplication.run(CoHabApplication.class, args);
-	}
+        SpringApplication.run(CoHabApplication.class, args);
+    }
 
 }
