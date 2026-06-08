@@ -4,7 +4,6 @@ WORKDIR /app
 
 COPY build.gradle .
 COPY gradlew .
-COPY settings.gradle .
 COPY gradle gradle/
 COPY settings.gradle .
 
@@ -13,10 +12,11 @@ RUN ./gradlew dependencies --no-daemon
 COPY src src/
 
 RUN chmod +x gradlew
-RUN ./gradlew nativeCompile
+RUN ./gradlew bootNativeImage --no-daemon
 
 FROM debian:latest
 COPY --from=builder /app/build/native/nativeCompile/ /app/
+
 EXPOSE 8080
 
-CMD ["/app/application"]
+CMD ["/app/CoHab"]
