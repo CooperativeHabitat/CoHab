@@ -12,7 +12,7 @@ RUN ./gradlew dependencies --no-daemon
 COPY src src/
 
 RUN chmod +x gradlew
-RUN ./gradlew bootNativeImage --no-daemon
+RUN ./gradlew nativeCompile --no-daemon
 
 FROM debian:latest
 COPY --from=builder /app/build/native/nativeCompile/ /app/
