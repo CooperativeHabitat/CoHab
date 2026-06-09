@@ -88,7 +88,7 @@ services:
     ports:
       - 127.0.0.1:${COHAB_SERVER_PORT}:${COHAB_SERVER_PORT}
     volumes:
-      - ./src/main/resources/certs:/app/src/resources/certs:ro
+      - ./src/main/resources:/app/src/resources:ro
     depends_on:
       - cohab-db
       - kafka1
