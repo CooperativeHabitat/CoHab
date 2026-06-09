@@ -1,6 +1,4 @@
 spring:
-#  autoconfigure:
-#    exclude: org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
@@ -68,8 +66,8 @@ redis:
 
 security:
   jwt:
-    public-key: file:src/main/certs/public.pem
-    private-key: file:src/main/certs/private.pem
+    public-key: file:src/main/resources/certs/public.pem
+    private-key: file:src/main/resources/certs/private.pem
     expires-at: ${JWT_EXPIRES_AT:86400}
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
