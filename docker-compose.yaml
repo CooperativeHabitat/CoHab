@@ -67,9 +67,7 @@ services:
     restart: always
 
   cohab-back:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/cooperativehabitat/cohab:main
     container_name: cohab-back
     environment:
       - COHAB_DB=${COHAB_DB}
@@ -89,6 +87,8 @@ services:
       - REDIS_PORT=${REDIS_PORT}
     ports:
       - 127.0.0.1:${COHAB_SERVER_PORT}:${COHAB_SERVER_PORT}
+    volumes:
+      - ./src/main/resources/certs:/app/src/resources/certs:ro
     depends_on:
       - cohab-db
       - kafka1

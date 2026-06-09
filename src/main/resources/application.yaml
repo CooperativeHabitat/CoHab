@@ -68,8 +68,8 @@ redis:
 
 security:
   jwt:
-    public-key: classpath:certs/public.pem
-    private-key: classpath:certs/private.pem
+    public-key: file:src/main/certs/public.pem
+    private-key: file:src/main/certs/private.pem
     expires-at: ${JWT_EXPIRES_AT:86400}
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
