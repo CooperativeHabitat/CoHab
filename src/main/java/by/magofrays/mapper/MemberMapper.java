@@ -16,9 +16,7 @@ import org.springframework.stereotype.Component;
 @Mapper(componentModel = "spring", uses = {PersonalInfoMapper.class, FamilyMapper.class, RoleMapper.class})
 public abstract class MemberMapper {
 
-
-    @Mapping(target = "username", source = "member.username")
-    @Mapping(target = "personalInfo", source = "member.personalInfo")
+    @Mapping(target = "member", source = "familyMember.member")
     public abstract ReadFamilyMemberDto toDto(FamilyMember familyMember);
 
     @Mapping(target = "username", source = "member.username")

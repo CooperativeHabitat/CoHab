@@ -11,8 +11,7 @@ import java.util.UUID;
 @Builder
 public class ReadFamilyMemberDto {
     UUID id;
-    String username;
-    PersonalInfoDto personalInfo;
+    MemberDto member;
     ReadFamilyDto family;
     List<RoleResponse> roles;
     private LocalDateTime addedAt;
