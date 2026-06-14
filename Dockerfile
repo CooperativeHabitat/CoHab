@@ -1,20 +1,20 @@
-FROM ghcr.io/graalvm/native-image-community:25 AS builder
-
+FROM gradle:8.7-jdk21 AS build-stage
 WORKDIR /app
 
 COPY build.gradle .
-COPY gradlew .
-COPY gradle gradle/
 COPY settings.gradle .
-
+COPY gradle gradle/
 COPY src src/
 
-RUN chmod +x gradlew
-RUN ./gradlew nativeCompile --no-daemon
+USER root
+RUN chown -R gradle:gradle /app
+USER gradle
 
-FROM debian:latest
-COPY --from=builder /app/build/native/nativeCompile/ /app/
+RUN gradle build -x test
 
-EXPOSE 8080
+FROM eclipse-temurin:21-jre-alpine
+
 WORKDIR /app
-CMD ["/app/CoHab"]
+COPY --from=build-stage /app/build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
