@@ -1,7 +1,6 @@
 package by.magofrays.security;
 
 import by.magofrays.exception.BusinessException;
-import by.magofrays.repository.FamilyMemberRepository;
 import by.magofrays.repository.FamilyRepository;
 import by.magofrays.service.AccessService;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,6 @@ import java.util.UUID;
 public class FamilyPermissionEvaluator implements PermissionEvaluator {
     private final AccessService accessService;
     private final FamilyRepository familyRepository;
-
-    private final FamilyMemberRepository familyMemberRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -42,15 +39,19 @@ public class FamilyPermissionEvaluator implements PermissionEvaluator {
                     () -> new BusinessException(HttpStatus.NOT_FOUND,
                             "Семьи %s не существует".formatted(familyId))
             );
-            if(family.getCreatedBy().getId().equals(memberId)){
-                return true;
-            }
+
             var accesses = accessService
                     .getAccessesByFamilyAndMemberId(UUID.fromString(targetId.toString()), memberId); // получаем из бд
             if (accesses == null) {
                 return false;
             }
-            return accesses.stream().anyMatch(access -> access.equals(permission));
+            return family
+                    .getCreatedBy()
+                    .getId()
+                    .equals(memberId) ||
+                    accesses
+                            .stream()
+                            .anyMatch(access -> access.equals(permission));
         }
         return false;
     }
