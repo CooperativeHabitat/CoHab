@@ -34,10 +34,15 @@ services:
     image: mongo:7.0
     container_name: ${MONGO_CONTAINER_NAME}
     restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
     ports:
       - "127.0.0.1:${MONGO_PORT}:${MONGO_PORT}"
     volumes:
       - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   redis:
     image: redis:7.2-alpine
@@ -109,7 +114,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 127.0.0.1:${COHAB_CHAT_PORT}:${COHAB_CHAT_PORT}
-      - 127.0.0.1:7000:7000 #rsocket
+      - 127.0.0.1:7000:7000
     environment:
       - EVENT_DB=${EVENT_DB}
       - EVENT_DB_PASSWORD=${EVENT_DB_PASSWORD}
@@ -133,10 +138,10 @@ services:
       - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - ./src/main/resources/certs/public.pem:/app/src/main/resources/certs/public.pem
+
 volumes:
   kafka_data:
   postgres_data:
   event_data:
   mongodb_data:
   redis_data:
-  clickhouse_data:

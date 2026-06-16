@@ -12,7 +12,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${COHAB_DB_CONTAINER_NAME:localhost}:${COHAB_DB_PORT:5432}/${COHAB_DB:cohab}
+    url: jdbc:postgresql://${COHAB_DB_CONTAINER_NAME}:${COHAB_DB_PORT:5432}/${COHAB_DB:cohab}
     username: ${COHAB_DB_USER:magofrays}
     password: ${COHAB_DB_PASSWORD:labubu}
 
