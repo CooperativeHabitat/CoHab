@@ -131,7 +131,8 @@ services:
       - MONGO_DB=${MONGO_DB}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-
+    volumes:
+      - ./src/main/resources/certs/public.pem:/app/src/main/resources/certs/public.pem
 volumes:
   kafka_data:
   postgres_data:
