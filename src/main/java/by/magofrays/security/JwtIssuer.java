@@ -17,7 +17,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtIssuer {
-    private final ObjectMapper objectMapper;
     private final JwtProperties properties;
 
     @SneakyThrows
@@ -30,7 +29,7 @@ public class JwtIssuer {
                 .withIssuedAt(Instant.now())
                 .withExpiresAt(Instant.now().plus(Duration.of(properties.getExpiresAt(), ChronoUnit.SECONDS)))
                 .withClaim("username", principal.getUsername())
-                .withClaim("superRole", authorities.getFirst())
+                .withClaim("scope", authorities)
                 .sign(Algorithm.RSA256(properties.getPrivateKey()));
     }
 

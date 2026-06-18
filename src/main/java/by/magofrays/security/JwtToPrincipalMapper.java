@@ -22,7 +22,7 @@ public class JwtToPrincipalMapper {
         return MemberPrincipal.builder()
                 .id(UUID.fromString(jwt.getSubject()))
                 .username(jwt.getClaim("username").asString())
-                .superRole(SuperRole.valueOf(jwt.getClaim("superRole").asString())).build();
+                .superRole(SuperRole.valueOf(jwt.getClaim("scope").asList(String.class).getFirst())).build();
     }
 
 }
