@@ -182,7 +182,7 @@ public class TaskService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<ReadTaskDto> getFamilyTasks(UUID familyId, UUID memberId) {
-        if (!familyMemberRepository.memberInFamily(memberId, familyId)) {
+        if (!familyMemberRepository.isMemberInFamily(memberId, familyId)) {
             throw new BusinessException(HttpStatus.NOT_FOUND,
                     "Пользователь с id: " + memberId + " не состоит в семье, либо семьи с id: " + familyId + "не существует!");
         }

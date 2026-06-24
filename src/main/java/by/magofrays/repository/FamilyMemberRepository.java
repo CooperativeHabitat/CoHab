@@ -13,13 +13,21 @@ public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID
     Optional<FamilyMember> findByMember_usernameAndFamily_Id(String username, UUID familyId);
 
     @Query("""
-        SELECT COUNT(fm) > 0 
-        FROM FamilyMember fm 
+        SELECT COUNT(fm) > 0
+        FROM FamilyMember fm
         WHERE fm.family.id = :familyId AND fm.member.id = :memberId
     """)
-    Boolean memberInFamily(@Param("memberId") UUID memberId, @Param("familyId") UUID familyId);
+    Boolean isMemberInFamily(@Param("memberId") UUID memberId, @Param("familyId") UUID familyId);
+
+    @Query("""
+        SELECT COUNT(DISTINCT fm.member.id) = (SELECT COUNT(m) FROM Member m WHERE m.id IN :memberIds)
+        FROM FamilyMember fm
+        WHERE fm.family.id = :familyId AND fm.member.id IN :memberIds
+    """)
+    Boolean isMembersInFamily(@Param("memberIds") List<UUID> memberIds, @Param("familyId") UUID familyId );
 
     Optional<FamilyMember> findByMember_IdAndFamily_Id(UUID memberId, UUID familyId);
+
 
     List<FamilyMember> findByFamily_Id(UUID familyId);
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,7 +111,7 @@ public class FamilyService {
             log.warn("Invitation code: {} is outdated", invitationCode);
             throw new BusinessException(HttpStatus.NOT_FOUND, "Кода приглашения: " + invitationCode + " не существует, либо он прекратил свое действие!");
         }
-        if (familyMemberRepository.memberInFamily(memberId, invitation.getFamilyId())) {
+        if (familyMemberRepository.isMemberInFamily(memberId, invitation.getFamilyId())) {
             log.warn("Member: {} is already in family", memberId);
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Пользователь уже состоит в этой семье!");
         }
@@ -202,5 +203,10 @@ public class FamilyService {
             // todo
         }
 
+    }
+
+
+    public Boolean isMembersInFamily(List<UUID> membersIds, UUID familyId){
+        return familyMemberRepository.isMembersInFamily(membersIds, familyId);
     }
 }
