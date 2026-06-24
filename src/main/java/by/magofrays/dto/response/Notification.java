@@ -6,12 +6,10 @@ import lombok.Data;
 import java.time.Instant;
 import java.util.UUID;
 
-@Data
-@Builder
-public class Notification {
-    private String from;
-    private UUID recipient;
-    private String message;
-    @Builder.Default
-    private Instant createdAt = Instant.now();
-}
+
+public record Notification (
+    String from,
+    UUID recipient,
+    String message,
+    Instant createdAt
+) {}
