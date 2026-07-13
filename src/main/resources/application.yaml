@@ -86,3 +86,25 @@ security:
     allowed-headers: "*"
     allow-credentials: true
     max-age: 3600
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+info:
+  app:
+    name: "cohab-family"
+    version: "1.0.0"
+    description: "service for family and role management"
+
