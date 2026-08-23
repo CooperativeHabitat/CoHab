@@ -18,7 +18,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
@@ -62,13 +62,14 @@ kafka:
 
 redis:
   cache:
-    ttl: ${JWT_EXPIRES_AT:86400}
+    ttl: ${JWT_EXPIRES_AT:24h}
 
 security:
   jwt:
     public-key: file:src/main/resources/certs/public.pem
     private-key: file:src/main/resources/certs/private.pem
-    expires-at: ${JWT_EXPIRES_AT:86400}
+    access-expires-at: ${JWT_EXPIRES_AT:24h}
+    refresh-expires-at: ${JWT_REFRESH_EXPIRES_AT:168h}
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
     allowed-methods: ${ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}

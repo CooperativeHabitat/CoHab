@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +29,19 @@ public class FamilyPermissionEvaluator implements PermissionEvaluator {
     @Override
     @Transactional
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (!authentication.isAuthenticated()) {
             return false;
         }
         if (Objects.equals(targetType, "family")) {
-            var principal = (MemberPrincipal) authentication.getPrincipal();
-            var memberId = principal.getId();
+            var jwt = (Jwt) authentication.getPrincipal();
+            if(jwt == null) {
+                return false;
+            }
+            var subject = jwt.getSubject();
+            if(subject == null) {
+                return false;
+            }
+            var memberId = UUID.fromString(subject);
             var familyId = UUID.fromString(targetId.toString());
             var family = familyRepository.findById(familyId).orElseThrow(
                     () -> new BusinessException(HttpStatus.NOT_FOUND,

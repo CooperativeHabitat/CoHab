@@ -1,52 +1,72 @@
-package by.magofrays.security;
+package by.magofrays.configuration;
 
-import by.magofrays.security.filter.JwtAuthFilter;
+import by.magofrays.security.CorsProperties;
+import by.magofrays.security.JwtProperties;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
 
 @Configuration
-@EnableMethodSecurity
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final AuthService authService;
+    private final JwtProperties jwtProperties;
     private final CorsProperties corsProperties;
-    private final FamilyPermissionEvaluator familyPermissionEvaluator;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public JWKSource<SecurityContext> jwkSource() {
+        RSAKey rsaKey = new RSAKey.Builder(jwtProperties.publicKey())
+                .privateKey(jwtProperties.privateKey())
+                .build();
+
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return new ImmutableJWKSet<>(jwkSet);
     }
 
 
     @Bean
-    public MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
-        DefaultMethodSecurityExpressionHandler expressionHandler =
-                new DefaultMethodSecurityExpressionHandler();
-        expressionHandler.setPermissionEvaluator(familyPermissionEvaluator);
-        return expressionHandler;
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withPublicKey(jwtProperties.publicKey()).build();
+    }
+
+    @Bean
+    public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean // Добавляет в SecurityContext роль пользователя
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        var converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            var role = jwt.getClaimAsString("role");
+            if (role == null) {
+                return List.of();
+            }
+            return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        });
+        return converter;
     }
 
     @Bean
@@ -65,7 +85,6 @@ public class SecurityConfiguration {
     @Bean
     @SneakyThrows
     public SecurityFilterChain securityFilterChain(HttpSecurity security) {
-        security.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         security
                 .csrf(AbstractHttpConfigurer::disable)
@@ -79,16 +98,12 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
-                .securityMatcher("/**");
+                .oauth2ResourceServer( configurer ->
+                        configurer.jwt(
+                                jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
+                                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                        ));
         return security.build();
     }
 
-    @Bean
-    @SneakyThrows
-    public AuthenticationManager authenticationManager(HttpSecurity security) {
-        AuthenticationManagerBuilder builder = security.getSharedObject(AuthenticationManagerBuilder.class);
-        builder.userDetailsService(authService)
-                .passwordEncoder(passwordEncoder());
-        return builder.build();
-    }
 }

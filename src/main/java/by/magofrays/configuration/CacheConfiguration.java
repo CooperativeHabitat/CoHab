@@ -1,6 +1,5 @@
 package by.magofrays.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -19,15 +18,12 @@ import java.time.Duration;
 public class CacheConfiguration {
 
     @Value("${redis.cache.ttl}")
-    private Integer ttl;
+    private Duration ttl;
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory cf) {
-
-        ObjectMapper mapper = new ObjectMapper();
-        Jackson2JsonRedisSerializer<Object> serializer =
-                new Jackson2JsonRedisSerializer<>(mapper, Object.class);
-
+        JacksonJsonRedisSerializer<Object> serializer =
+                new JacksonJsonRedisSerializer<>(Object.class);
         RedisCacheConfiguration cfg = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair
@@ -37,7 +33,7 @@ public class CacheConfiguration {
                         RedisSerializationContext.SerializationPair
                                 .fromSerializer(new StringRedisSerializer())
                 )
-                .entryTtl(Duration.ofSeconds(ttl))
+                .entryTtl(Duration.ofSeconds(ttl.getSeconds()))
                 .disableCachingNullValues();
 
         return RedisCacheManager.builder(cf)

@@ -33,7 +33,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ReadMemberDto createMember(RegistrationRequest registrationRequest) {
+    public Member createMember(RegistrationRequest registrationRequest) {
         log.info("Creating new member");
         Member member = memberMapper.toEntity(registrationRequest);
         member.setPassword(passwordEncoder.encode(registrationRequest.password()));
@@ -42,7 +42,7 @@ public class MemberService {
         personalInfo.setMember(member);
         member = memberRepository.save(member);
         personalInfoRepository.save(personalInfo);
-        return memberMapper.toDto(member);
+        return member;
     }
 
     @Transactional
@@ -78,5 +78,16 @@ public class MemberService {
         personalInfo.setLastname(personalInfoRequest.lastname());
         personalInfoRepository.save(personalInfo);
         return memberMapper.toDto(member);
+    }
+
+    public ReadMemberDto findById(UUID memberId) {
+        return memberMapper.toDto(
+                memberRepository.findById(memberId).orElseThrow(
+                        () -> new BusinessException(
+                                HttpStatus.NOT_FOUND,
+                                "Пользователь с id: %s не существует".formatted(memberId)
+                        )
+                )
+        );
     }
 }
